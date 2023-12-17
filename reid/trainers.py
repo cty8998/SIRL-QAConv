@@ -216,9 +216,9 @@ class BaseTrainer(object):
             weight_matrix = torch.empty((feat_fusion.shape[0], feat_fusion.shape[1], feat_fusion.shape[2], feat_fusion.shape[3])).uniform_(self.args.omega_l, self.args.omega_H).cuda(img.device)
             # use the Adain decoder to generate the synthetic image
             for j in range(img.shape[0]):
-                img_ASS_a = self.adain.decoder(weight_matrix[j:j+1] * feat_fusion[j:j+1] + (1 - weight_matrix[j:j+1]) * img_content_feature[j:j+1])
-                img_ASS_a = self.recover_image(img_ASS_a)
-                input_ASS_list.append(img_ASS_a.cuda(img.device))
+                img_ASS_update = self.adain.decoder(weight_matrix[j:j+1] * feat_fusion[j:j+1] + (1 - weight_matrix[j:j+1]) * img_content_feature[j:j+1])
+                img_ASS_update = self.recover_image(img_ASS_update)
+                input_ASS_list.append(img_ASS_update.cuda(img.device))
             input_ASS = qaconv_train_transformers(torch.cat(input_ASS_list, dim=0))
 
         return input_ASS
