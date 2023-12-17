@@ -30,6 +30,9 @@ python main.py --output_dir (the path of the saved models) --logfile (the path o
 #### Test only
 `python main.py --dataset market --testset cuhk03_np_detected[,market,msmt] --resume (the path of the testing model) --evaluate`
 
+#### Pretrained adain models:
+[Google Drive](https://drive.google.com/drive/folders/1YJOUCCWtw-yOp4OWejeRdAL2kjZl_58N?usp=drive_link)
+
 ## Citation
 
 If you find our work useful in your research, please consider citing our paper:
