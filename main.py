@@ -223,7 +223,45 @@ def main(args):
                     print('  %s: rank1=%.1f, mAP=%.1f.\n' % (test_name, test_rank1 * 100, test_mAP * 100))
 
             test_time = time.time() - t0
-    
+
+    if args.evaluate:
+        # Evaluate the learned model after every epoch
+        print('Evaluate the learned model:')
+        t0 = time.time()
+
+        test_names = args.testset.strip().split(',')
+        for test_name in test_names:
+            if test_name not in datasets.names():
+                print('Unknown dataset: %s.' % test_name)
+                continue
+
+            t1 = time.time()
+            testset, test_query_loader, test_gallery_loader = \
+                get_test_data(test_name, args.height, args.width, args.workers, args.test_fea_batch)
+
+            if not args.do_tlift:
+                testset.has_time_info = False
+
+            test_rank1, test_mAP, test_rank1_rerank, test_mAP_rerank, test_rank1_tlift, test_mAP_tlift, test_dist, \
+            test_dist_rerank, test_dist_tlift, pre_tlift_dict = \
+                evaluator.evaluate(matcher, testset, test_query_loader, test_gallery_loader, 
+                                    args.test_gal_batch, args.test_prob_batch,
+                                args.tau, args.sigma, args.K, args.alpha)
+
+            test_time = time.time() - t1
+
+            if testset.has_time_info:
+                test_dict = {'test_dataset': test_name, 'rank1': test_rank1, 'mAP': test_mAP, 'rank1_rerank': test_rank1_rerank, 
+                        'mAP_rerank': test_mAP_rerank, 'rank1_tlift': test_rank1_tlift, 'mAP_tlift': test_mAP_tlift, 'test_time': test_time}
+                print('  %s: rank1=%.1f, mAP=%.1f, rank1_rerank=%.1f, mAP_rerank=%.1f,'
+                    ' rank1_rerank_tlift=%.1f, mAP_rerank_tlift=%.1f.\n'
+                    % (test_name, test_rank1 * 100, test_mAP * 100, test_rank1_rerank * 100, test_mAP_rerank * 100,
+                        test_rank1_tlift * 100, test_mAP_tlift * 100))
+            else:
+                test_dict = {'test_dataset': test_name, 'rank1': test_rank1, 'mAP': test_mAP, 'test_time': test_time}
+                print('  %s: rank1=%.1f, mAP=%.1f.\n' % (test_name, test_rank1 * 100, test_mAP * 100))
+
+        test_time = time.time() - t0
         
     json_file = osp.join(output_dir, 'results.json')
     
